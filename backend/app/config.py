@@ -91,7 +91,7 @@ class Settings:
     # Vision (F3, F9) and speech (F4); any OpenAI-compatible endpoint, defaults to the LLM settings
     vision_model: str = field(default_factory=lambda: _env("VISION_MODEL", "gpt-4o-mini"))
     stt_provider: str = field(default_factory=lambda: _env("STT_PROVIDER", "auto"))  # auto | sarvam | openai | demo
-    stt_api_key: str = field(default_factory=lambda: _env("STT_API_KEY"))
+    stt_api_key: str = field(default_factory=lambda: _env("SARVAM_API_KEY") or _env("STT_API_KEY"))
     stt_model: str = field(default_factory=lambda: _env("STT_MODEL", ""))
     embedding_model: str = field(default_factory=lambda: _env("EMBEDDING_MODEL", ""))  # empty = BM25 retrieval only
     tts_provider: str = field(default_factory=lambda: _env("TTS_PROVIDER", "auto"))  # auto | sarvam | edge | openai | off

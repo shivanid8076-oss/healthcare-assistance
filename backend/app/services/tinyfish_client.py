@@ -45,7 +45,7 @@ GOAL_TEMPLATE = """You are on the eRaktKosh "Stock Availability" page of the Gov
 2. Wait for the district list to load. In "Select District" choose the option that best matches "{district}". If nothing is close, choose "All".
 3. In "Select Blood Group" choose "All Blood Groups".
 4. In "Select Blood Component" choose "{component}".
-5. Click Search and wait for the results table. Read the "Government Blood Banks" tab and the "Other Blood Banks" tab.
+5. Click Search and wait for the results table. Read the complete results table. "Government Blood Banks" and "Other Blood Banks" are descriptive category labels, NOT interactive tabs. Extract every bank row shown in the table, including all categories.
 
 Return the result in the output schema:
 - district_selected: the district option you chose.
@@ -54,7 +54,8 @@ Return the result in the output schema:
 - stock: the number of units shown for each group. Use 0 for a group shown as not available. Leave out groups that are not mentioned. Ignore Bombay groups (Oh+Ve, Oh-Ve).
 - availability_text: the Availability cell text exactly as shown.
 - If the table is empty, return an empty banks list.
-- If a captcha, an error page or an access block appears, set error to a short reason."""
+- On successful data extraction, always set error to null. Never put explanations, status notes or success messages in the error field.
+- Set error to a short reason only when a captcha, error page or access block actually prevents data extraction."""
 
 _GROUP_PROPS = {g: {"type": "integer", "minimum": 0} for g in GROUPS}
 # Structured output (W3). Only keywords from TinyFish's allowlist; validate_result stays as a second line of defence.

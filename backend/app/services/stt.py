@@ -43,14 +43,49 @@ def _demo(data: bytes) -> dict | None:
     return None
 
 
+VALID_WHISPER_MODELS = {
+    "tiny", "tiny.en", "base", "base.en", "small", "small.en",
+    "medium", "medium.en", "large-v1", "large-v2", "large-v3",
+    "large", "large-v3-turbo", "turbo",
+    "distil-large-v2", "distil-medium.en", "distil-small.en",
+    "distil-large-v3", "distil-large-v3.5",
+}
+
+
+def _local_whisper_model_name() -> str:
+    """Return a valid Faster-Whisper model name.
+
+    If settings.stt_model is configured with a cloud provider model (e.g. 'saaras:v4', 'whisper-1')
+    or an unknown non-whisper identifier, safely fall back to 'base'.
+    """
+    model = (settings.stt_model or "").strip()
+    if model in VALID_WHISPER_MODELS or "/" in model or os.path.exists(model):
+        return model
+    return "base"
+
+
 def _sarvam(data: bytes, mime: str) -> dict:
     files = {"file": ("voice" + _ext(mime), data, mime or "audio/ogg")}
-    form = {"model": settings.stt_model or "saaras:v3", "language_code": "unknown"}
-    r = httpx.post("https://api.sarvam.ai/speech-to-text", headers={"api-subscription-key": settings.stt_api_key},
-                   files=files, data=form, timeout=30)
+    model = settings.stt_model if (settings.stt_model and settings.stt_model not in VALID_WHISPER_MODELS) else "saaras:v4"
+    form = {
+        "model": model,
+        "language_code": "unknown",
+        "mode": "codemix",
+    }
+    r = httpx.post(
+        "https://api.sarvam.ai/speech-to-text",
+        headers={"api-subscription-key": settings.stt_api_key},
+        files=files,
+        data=form,
+        timeout=20.0,
+    )
     r.raise_for_status()
     body = r.json()
-    return {"text": body.get("transcript", ""), "engine": f"sarvam:{form['model']}", "language": body.get("language_code")}
+    return {
+        "text": body.get("transcript", ""),
+        "engine": f"sarvam:{model}",
+        "language": body.get("language_code"),
+    }
 
 
 def _openai(data: bytes, mime: str) -> dict:
@@ -109,32 +144,35 @@ def warm() -> None:
         return
     try:
         from faster_whisper import WhisperModel
-        _local_model = WhisperModel(settings.stt_model or "base", device="cpu", compute_type="int8")
+        _local_model = WhisperModel(_local_whisper_model_name(), device="cpu", compute_type="int8")
         log.info("local speech model ready")
     except Exception as e:  # noqa: BLE001
         log.warning("local speech model unavailable: %s", e)
 
 
-def _local(data: bytes, mime: str) -> dict:
+def _local(data: bytes, mime: str, *, extract_slip: bool = False) -> dict:
     """faster-whisper on CPU (model 'base' by default, downloaded once and cached)."""
     global _local_model
     from faster_whisper import WhisperModel
 
     if _local_model is None:
-        _local_model = WhisperModel(settings.stt_model or "base", device="cpu", compute_type="int8")
+        _local_model = WhisperModel(_local_whisper_model_name(), device="cpu", compute_type="int8")
     audio = decode_16k(data, mime)
     # Pass 1: romanised Hinglish (Whisper writes Hindi speech in Urdu script unless steered; a generic prompt steers it).
     en, _ = _local_model.transcribe(audio, language="en", initial_prompt=HINGLISH_PROMPT)
     text = " ".join(s.text.strip() for s in en).strip()
-    # Pass 2: Devanagari, appended only when it carries request details the first pass missed.
-    from .extraction import FIELDS, rule_extract
-    got = rule_extract(text)
-    if any(got[k] is None for k in ("patient_group", "hospital", "units")):
-        hi, _ = _local_model.transcribe(audio, language="hi")
-        hi_text = " ".join(s.text.strip() for s in hi).strip()
-        extra = rule_extract(hi_text)
-        if any(got[k] is None and extra[k] is not None for k in FIELDS):
-            text = f"{text} / {hi_text}"
+
+    # Pass 2: Devanagari recovery only for hospital slip extraction when fields are missing
+    if extract_slip:
+        from .extraction import FIELDS, rule_extract
+        got = rule_extract(text)
+        if any(got[k] is None for k in ("patient_group", "hospital", "units")):
+            hi, _ = _local_model.transcribe(audio, language="hi")
+            hi_text = " ".join(s.text.strip() for s in hi).strip()
+            extra = rule_extract(hi_text)
+            if any(got[k] is None and extra[k] is not None for k in FIELDS):
+                text = f"{text} / {hi_text}"
+
     return {"text": text, "engine": "whisper-local", "language": "hi-en"}
 
 
@@ -146,7 +184,7 @@ def _ext(mime: str) -> str:
             "audio/mp4": ".m4a", "audio/aac": ".aac", "audio/amr": ".amr"}.get((mime or "").split(";")[0], ".ogg")
 
 
-def transcribe(data: bytes, mime: str = "audio/ogg") -> dict:
+def transcribe(data: bytes, mime: str = "audio/ogg", *, extract_slip: bool = False) -> dict:
     """{"text", "engine", "language"} or {"text": "", "error": ...}. Never raises."""
     if not data or len(data) > MAX_BYTES:
         return {"text": "", "error": "audio missing or too large", "engine": "none"}
@@ -154,11 +192,49 @@ def transcribe(data: bytes, mime: str = "audio/ogg") -> dict:
     p = provider()
     if p == "demo":
         return sample or {"text": "", "error": "Speech-to-text is not configured (STT_PROVIDER / STT_API_KEY).", "engine": "demo"}
+
+    # Sarvam with automatic Faster-Whisper fallback
+    if p == "sarvam":
+        if not settings.stt_api_key:
+            log.warning("Sarvam provider selected but STT_API_KEY / SARVAM_API_KEY not configured; falling back to local Whisper")
+            try:
+                out_local = _local(data, mime, extract_slip=extract_slip)
+                if out_local.get("text", "").strip():
+                    return out_local
+            except Exception as e_local:  # noqa: BLE001
+                log.warning("Local STT fallback failed: %s", e_local)
+            return sample or {"text": "", "error": "STT API key missing and local fallback failed", "engine": "error"}
+
+        try:
+            out = _sarvam(data, mime)
+            if not out.get("text", "").strip():
+                raise ValueError("empty transcript received from Sarvam")
+            return out
+        except Exception as e_sarvam:  # noqa: BLE001
+            log.warning("Sarvam STT failed (%s); attempting fallback to local Whisper", e_sarvam)
+            try:
+                out_local = _local(data, mime, extract_slip=extract_slip)
+                if out_local.get("text", "").strip():
+                    return out_local
+            except Exception as e_local:  # noqa: BLE001
+                log.warning("Both Sarvam and local STT failed: sarvam=%s, local=%s", e_sarvam, e_local)
+                return sample or {"text": "", "error": "Both Sarvam AI and local transcription failed", "engine": "error"}
+
     try:
-        out = {"sarvam": _sarvam, "openai": _openai, "local": _local}[p](data, mime)
+        if p == "local":
+            out = _local(data, mime, extract_slip=extract_slip)
+        elif p == "openai":
+            out = _openai(data, mime)
+        else:
+            out = {"sarvam": _sarvam, "openai": _openai, "local": lambda d, m: _local(d, m, extract_slip=extract_slip)}[p](data, mime)
         if not out.get("text", "").strip():
             raise ValueError("empty transcript")
         return out
     except Exception as e:  # noqa: BLE001
         log.warning("stt %s failed: %s", p, e)
+        if p == "openai":
+            try:
+                return _local(data, mime, extract_slip=extract_slip)
+            except Exception:  # noqa: BLE001
+                pass
         return sample or {"text": "", "error": f"{p} failed", "engine": p}

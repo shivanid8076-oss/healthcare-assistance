@@ -16,7 +16,7 @@ export function isLang(value: unknown): value is Lang {
 }
 
 const DICT = {
-  brand: { en: "Rakt Doot", hi: "रक्त दूत" },
+  brand: { en: "Blood", hi: "ब्लड" },
   tagline: { en: "Emergency blood finder", hi: "आपातकालीन रक्त खोज" },
   nav_find: { en: "Find blood", hi: "खून ढूंढें" },
   nav_donate: { en: "Become a donor", hi: "डोनर बनें" },
@@ -81,6 +81,7 @@ const DICT = {
   stale_note: { en: "Live lookup failed ({reason}). Showing the last saved results.", hi: "लाइव खोज नहीं हो सकी ({reason})। पिछले सेव नतीजे दिखा रहे हैं।" },
   unavailable_note: { en: "Live stock could not be fetched ({reason}). Call blood centres directly, or ask donors now.", hi: "लाइव स्टॉक नहीं मिला ({reason})। सीधे ब्लड सेंटर को कॉल करें या अभी डोनरों से पूछें।" },
   units_of: { en: "units", hi: "यूनिट" },
+  not_reported: { en: "Not reported", hi: "रिपोर्ट नहीं हुआ" },
   none_listed: { en: "none listed", hi: "उपलब्ध नहीं" },
   distance_unknown: { en: "distance not known", hi: "दूरी पता नहीं" },
   call: { en: "Call", hi: "कॉल" },
@@ -364,6 +365,36 @@ const DICT = {
   disclaimer: {
     en: "Rakt Doot is a student project. It is not a medical service and does not decide who can donate. Blood stock comes from official blood-centre records and can change at any time; call the blood centre before you travel. In an emergency, call 112.",
     hi: "रक्त दूत एक छात्र परियोजना है। यह चिकित्सा सेवा नहीं है और तय नहीं करता कि कौन दान कर सकता है। स्टॉक आधिकारिक ब्लड सेंटर रिकॉर्ड से आता है और बदल सकता है; जाने से पहले ब्लड सेंटर को कॉल करें। आपात स्थिति में 112 पर कॉल करें।",
+  },
+
+  // AI Assistant
+  assistant_title: { en: "Blood AI Assistant", hi: "ब्लड AI सहायक" },
+  assistant_badge: { en: "AI Guidance", hi: "AI मार्गदर्शन" },
+  assistant_button_label: { en: "Open Blood AI Assistant", hi: "ब्लड AI सहायक खोलें" },
+  assistant_close: { en: "Close Assistant", hi: "सहायक बंद करें" },
+  assistant_welcome: {
+    en: "Hello! I am Blood AI Assistant. How can I help you with blood donation, compatibility, camps, or finding blood today?",
+    hi: "नमस्ते! मैं ब्लड AI सहायक हूँ। आज मैं रक्तदान, अनुकूलता, शिविर, या खून ढूंढने में आपकी क्या सहायता कर सकता हूँ?",
+  },
+  assistant_input_placeholder: {
+    en: "Ask about blood donation, camps, compatibility...",
+    hi: "रक्तदान, शिविर, अनुकूलता के बारे में पूछें...",
+  },
+  assistant_send: { en: "Send", hi: "भेजें" },
+  assistant_thinking: { en: "Thinking...", hi: "सोच रहे हैं..." },
+  assistant_retry: { en: "Retry", hi: "पुनः प्रयास करें" },
+  assistant_error: {
+    en: "Could not get a response. Please check your connection and try again.",
+    hi: "उत्तर प्राप्त नहीं हो सका। कृपया अपना कनेक्शन जांचें और पुनः प्रयास करें।",
+  },
+  assistant_chip_find: { en: "Find Blood", hi: "खून ढूंढें" },
+  assistant_chip_compatibility: { en: "Blood Compatibility", hi: "ब्लड ग्रुप अनुकूलता" },
+  assistant_chip_eligibility: { en: "Donation Eligibility", hi: "रक्तदान पात्रता" },
+  assistant_chip_camps: { en: "Blood Camps", hi: "रक्तदान शिविर" },
+  assistant_clear: { en: "Clear chat", hi: "चैट साफ़ करें" },
+  assistant_disclaimer: {
+    en: "AI guidance only. In an emergency, call 112 or visit the nearest hospital.",
+    hi: "केवल AI मार्गदर्शन। आपात स्थिति में 112 पर कॉल करें या निकटतम अस्पताल जाएं।",
   },
 } as const;
 

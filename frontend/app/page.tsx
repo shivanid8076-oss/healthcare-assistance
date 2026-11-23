@@ -16,7 +16,7 @@ const C = {
   chip_signup: { en: "No sign-up", hi: "साइन-अप नहीं", mr: "नोंदणी नाही", bn: "সাইন-আপ নেই", ta: "பதிவு தேவையில்லை" },
   chip_lang: { en: "5 languages + voice", hi: "5 भाषाएं + आवाज़", mr: "5 भाषा + आवाज", bn: "৫টি ভাষা + ভয়েস", ta: "5 மொழிகள் + குரல்" },
   chip_wa: { en: "Works on WhatsApp", hi: "WhatsApp पर काम करता है", mr: "WhatsApp वर चालते", bn: "WhatsApp-এ চলে", ta: "WhatsApp-இல் இயங்கும்" },
-  phone_title: { en: "Rakt Doot", hi: "रक्त दूत", mr: "रक्त दूत", bn: "রক্ত দূত", ta: "ரக்த் தூத்" },
+  phone_title: { en: "Blood", hi: "ब्लड", mr: "ब्लड", bn: "ব্লাড", ta: "பிளட்" },
   phone_online: { en: "alert to a donor 2.1 km away", hi: "2.1 किमी दूर डोनर को अलर्ट", mr: "2.1 किमी दूरच्या रक्तदात्याला सूचना", bn: "২.১ কিমি দূরের দাতাকে সতর্কবার্তা", ta: "2.1 கிமீ தொலைவிலுள்ள தானதாரருக்கு எச்சரிக்கை" },
   m1: { en: "B+ red cells needed at Safdarjung Hospital, 2.1 km from you. You're B+, an exact match. Can you donate today?",
     hi: "सफदरजंग अस्पताल में B+ रेड सेल चाहिए, आपसे 2.1 किमी। आपका ग्रुप B+ है, बिल्कुल मेल। क्या आज दान कर सकते हैं?",

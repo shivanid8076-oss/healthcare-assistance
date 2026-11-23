@@ -39,7 +39,15 @@ export async function upload<T>(path: string, form: FormData): Promise<T> {
   } catch {
     throw new ApiError(0, "Cannot reach the Rakt Doot server. Check your connection and try again.");
   }
-  if (!res.ok) throw new ApiError(res.status, `Upload failed (${res.status})`);
+  if (!res.ok) {
+    let msg = `Upload failed (${res.status})`;
+    try {
+      const body = await res.json();
+      if (typeof body.detail === "string") msg = body.detail;
+      else if (Array.isArray(body.detail)) msg = body.detail.map((d: { msg: string }) => d.msg).join(". ");
+    } catch {}
+    throw new ApiError(res.status, msg);
+  }
   return res.json() as Promise<T>;
 }
 
@@ -143,6 +151,60 @@ export type SlipFields = {
 };
 
 export type GuideAnswer = { answer: string; sources: { title: string; url: string }[]; refused: boolean; engine: string };
+
+export type AssistantMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+export type AssistantChatRequest = {
+  messages: AssistantMessage[];
+  message: string;
+  lang?: "auto" | "en" | "hi" | "hinglish";
+  location?: { lat: number; lng: number } | null;
+};
+
+export type AssistantChatResponse = {
+  reply: string;
+  suggestions: string[];
+  sources: { title: string; url: string }[];
+  detected_lang?: "en" | "hi" | "hinglish";
+};
+
+export type TranscribeResponse = {
+  transcript: string;
+  engine: string;
+  language?: string | null;
+  error: string | null;
+};
+
+export type AssistantSpeakRequest = {
+  text: string;
+  lang?: "auto" | "en" | "hi" | "hinglish";
+};
+
+/** Fetch synthesized speech audio blob from /api/assistant/speak */
+export async function fetchAssistantSpeech(text: string, lang?: string): Promise<Blob> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/api/assistant/speak`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, lang: lang || "auto" }),
+    });
+  } catch {
+    throw new ApiError(0, "Cannot reach the Rakt Doot server. Check your connection and try again.");
+  }
+  if (!res.ok) {
+    let msg = `Speech synthesis failed (${res.status})`;
+    try {
+      const body = await res.json();
+      if (typeof body.detail === "string") msg = body.detail;
+    } catch {}
+    throw new ApiError(res.status, msg);
+  }
+  return res.blob();
+}
 
 export type Config = {
   whatsapp_mode: "cloud" | "twilio" | "mock"; tinyfish_mode: "live" | "demo"; join_link: string; component: string; radii_km: number[];

@@ -15,3 +15,7 @@ backend/.venv/
 **/*.md
 !README.md
 !**/README.md
+
+# Protect local environment files
+.env.*
+!.env.example

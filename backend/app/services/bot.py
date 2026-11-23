@@ -61,7 +61,7 @@ def _handle(db: Session, phone: str, text: str = "", button_id: str | None = Non
     donor = db.scalar(select(Donor).where(Donor.phone == phone))
     lang = donor.language if donor else conv.data.get("lang", "en")
     if media and media.get("kind") == "audio":
-        heard = stt.transcribe(media.get("data") or b"", media.get("mime") or "audio/ogg")
+        heard = stt.transcribe(media.get("data") or b"", media.get("mime") or "audio/ogg", extract_slip=True)
         transcript = heard.get("text", "").strip()
         shown = camp_registration.mask_aadhaar(transcript) if conv.state == "cr_aadhaar" else transcript
         whatsapp.log_inbound(db, phone, f"[voice note] {shown}" if shown else "[voice note]",

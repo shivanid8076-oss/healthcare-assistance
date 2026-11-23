@@ -41,10 +41,14 @@ HI_EN = {"शराब": "alcohol", "दारू": "alcohol", "उम्र": "
          "kitni baar": "how often", "kab": "how often", "daru": "alcohol", "sharab": "alcohol", "paise": "charges", "kharcha": "charges"}
 # the question itself must be about blood or donation; generic words like "stock" or "age" alone are not enough
 DOMAIN = re.compile(r"blood|donat|donor|platelet|plasma|transfus|eraktkosh|cross.?match|replacement card|haemo|hemo|"
-                    r"thalass|nbtc|रक्त|खून|दान|डोनर|प्लेटलेट", re.I)
+                    r"thalass|nbtc|रक्त|खून|दान|डोनर|प्लेटलेट|khoon|rakt|daan", re.I)
 PERSONAL_MEDICAL = re.compile(r"\b(i|me|my|mine|main|mera|meri|mujhe|can i|should i)\b.*\b(medic|tablet|pill|antibiotic|pregnan|diabet|"
                               r"bp|pressure|surgery|operation|tattoo|fever|disease|illness|cancer|hiv|hepatitis|period|vaccine|covid)", re.I)
-DOCTOR = {"en": "For your own situation, please ask the blood centre doctor.", "hi": "अपनी स्थिति के लिए कृपया ब्लड सेंटर के डॉक्टर से पूछें।"}
+DOCTOR = {
+    "en": "For your own situation, please ask the blood centre doctor.",
+    "hi": "अपनी स्थिति के लिए कृपया ब्लड सेंटर के डॉक्टर से पूछें।",
+    "hinglish": "Apni situation ke liye kripya blood centre ke doctor se consult karein.",
+}
 
 
 # ---------------------------------------------------------------- building the knowledge base
@@ -161,10 +165,12 @@ Never give personal medical advice."""
 
 def answer(question: str, lang: str = "en") -> dict:
     """{"answer", "sources": [{title, url}], "refused": bool, "engine"}"""
-    lang = lang if lang in ("en", "hi") else "en"
+    lang = lang if lang in ("en", "hi", "hinglish") else "en"
     q = (question or "").strip()[:500]
     hits = search(q) if q else []
     if not q or not DOMAIN.search(q + " " + " ".join(_tok(q))) or not hits or hits[0][0] < MIN_SCORE:
+        if lang == "hinglish":
+            return {"answer": "Main sirf official blood-donation guidance se jawab de sakta hoon, aur yeh wahan nahi mila. Kripya blood centre ke doctor se poochhein.", "sources": [], "refused": True, "engine": "rules"}
         from .messages import t
         return {"answer": t("guide_refuse", lang), "sources": [], "refused": True, "engine": "rules"}
     personal = bool(PERSONAL_MEDICAL.search(q))
@@ -172,11 +178,14 @@ def answer(question: str, lang: str = "en") -> dict:
     if settings.llm_api_key:
         try:
             ctx = "\n".join(f"[{i + 1}] {h['text']}" for i, (_, h) in enumerate(hits))
-            raw = llm.chat_json(ANSWER_SYSTEM.replace("{lang}", "Hindi" if lang == "hi" else "English"), f"Passages:\n{ctx}\n\nQuestion: {q}", timeout=15)
+            target_lang = "Hindi" if lang == "hi" else ("Hinglish (conversational Hindi in Roman script)" if lang == "hinglish" else "English")
+            raw = llm.chat_json(ANSWER_SYSTEM.replace("{lang}", target_lang), f"Passages:\n{ctx}\n\nQuestion: {q}", timeout=15)
             cites = [c for c in raw.get("citations") or [] if isinstance(c, int) and 1 <= c <= len(hits)]
             if isinstance(raw.get("answer"), str) and raw["answer"].strip() and cites:
                 text, used, engine = raw["answer"].strip()[:700], [hits[c - 1][1] for c in cites], "llm"
             elif raw.get("answer") is None:
+                if lang == "hinglish":
+                    return {"answer": "Main sirf official blood-donation guidance se jawab de sakta hoon, aur yeh wahan nahi mila. Kripya blood centre ke doctor se poochhein.", "sources": [], "refused": True, "engine": "llm"}
                 from .messages import t
                 return {"answer": t("guide_refuse", lang), "sources": [], "refused": True, "engine": "llm"}
         except Exception as e:  # noqa: BLE001
@@ -185,8 +194,10 @@ def answer(question: str, lang: str = "en") -> dict:
         text = _best_sentences(hits[0][1]["text"], q)
         if lang == "hi":
             text = "आधिकारिक स्रोत (अंग्रेज़ी में): " + text
+        elif lang == "hinglish":
+            text = "Official source (English mein): " + text
     if personal:
-        text += " " + DOCTOR[lang]
+        text += " " + DOCTOR.get(lang, DOCTOR["en"])
     sources = list({h["url"]: {"title": h["title"], "url": h["url"]} for h in used}.values())
     return {"answer": text, "sources": sources, "refused": False, "engine": engine}
 

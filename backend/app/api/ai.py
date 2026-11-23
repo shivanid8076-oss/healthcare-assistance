@@ -85,7 +85,7 @@ async def voice_parse(file: UploadFile | None = File(default=None), sample: str 
         data, mime = await file.read(stt.MAX_BYTES + 1), file.content_type or "audio/webm"
     else:
         raise HTTPException(422, "send an audio file or ?sample=voice_request.mp3")
-    heard = await run_in_threadpool(stt.transcribe, data, mime)
+    heard = await run_in_threadpool(stt.transcribe, data, mime, extract_slip=True)
     del data
     text = heard.get("text", "")
     return {"transcript": text, "engine": heard.get("engine"), "sample": heard.get("sample", False), "error": heard.get("error"),

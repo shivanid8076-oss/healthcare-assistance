@@ -15,9 +15,10 @@ import "@fontsource/noto-serif-devanagari/600.css";
 import "./globals.css";
 import { Footer, Header } from "@/components/Chrome";
 import { LangProvider } from "@/lib/i18n";
+import { AIAssistant } from "@/components/AIAssistant";
 
 export const metadata: Metadata = {
-  title: "Rakt Doot | Emergency blood finder",
+  title: "Blood | Emergency blood finder",
   description: "Live blood stock at nearby blood centres, compatible donors on WhatsApp, voice requests, shortage forecasts and more.",
   manifest: "/manifest.webmanifest",
   icons: { icon: "/icon.svg" },
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Header />
           <main id="main"><TelegramConnect />{children}</main>
           <Footer />
+          <AIAssistant />
         </LangProvider>
       </body>
     </html>

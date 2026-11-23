@@ -75,7 +75,7 @@ export default function FindBlood() {
       await api(`/api/requests/${created.id}/dispatch?t=${encodeURIComponent(created.manage_token)}`, { method: "POST" });
       try {
         localStorage.setItem(`rd:req:${created.id}`, created.manage_token);
-      } catch {}
+      } catch { }
       router.push(`/request/${created.id}?t=${encodeURIComponent(created.manage_token)}`);
     } catch (err) {
       setSubmitError((err as Error).message);
@@ -382,8 +382,10 @@ function StockStep({ group, component, origin, onAskDonors }: { group: Group; co
     es.onerror = () => {
       es.close();
       if (!finished) {
-        setResult({ source: "unavailable", sample: false, fetched_at: null, run_id: null, streaming_url: null, reason: "connection lost",
-          group, compatible_groups: [], banks: [], summary: { banks_checked: 0, banks_with_stock: 0, suggest_donors: true } });
+        setResult({
+          source: "unavailable", sample: false, fetched_at: null, run_id: null, streaming_url: null, reason: "connection lost",
+          group, compatible_groups: [], banks: [], summary: { banks_checked: 0, banks_with_stock: 0, suggest_donors: true }
+        });
       }
     };
     const timer = setInterval(() => tick((n) => n + 1), 30000);
@@ -476,7 +478,7 @@ function StockStep({ group, component, origin, onAskDonors }: { group: Group; co
 
 function BankRow({ bank, group }: { bank: Bank; group: Group }) {
   const { t } = useLang();
-  const total = bank.total_compatible ?? 0;
+  const total = bank.total_compatible;
   const entries = Object.entries(bank.compatible_units) as [Group, number][];
   return (
     <li>
@@ -489,8 +491,10 @@ function BankRow({ bank, group }: { bank: Bank; group: Group }) {
         </div>
       </div>
       <div className="units num">
-        <b className={total ? undefined : "zero"}>{total}</b>
-        <span>{t("units_of")}</span>
+        <b className={total === 0 ? "zero" : undefined}>
+          {total === null ? t("not_reported") : total}
+        </b>
+        {total !== null && <span>{t("units_of")}</span>}
       </div>
       {entries.length > 0 && (
         <div className="split num" aria-label={`Stock by group for a ${group} patient`}>

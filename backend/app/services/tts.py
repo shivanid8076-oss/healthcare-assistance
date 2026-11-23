@@ -21,6 +21,15 @@ from ..config import settings
 log = logging.getLogger("raktdoot.tts")
 MAX_CHARS = 900
 
+EMOJI_PATTERN = re.compile(
+    r"[\U00010000-\U0010ffff"  # Supplemental symbols, pictographs, emojis (e.g. 🩸, 🏥, 📍, 📅, 🚨)
+    r"\u2600-\u27bf"          # Misc symbols & dingbats (e.g. ☎, 📞, ❄, ⚡)
+    r"\u2300-\u23ff"          # Misc technical symbols
+    r"\u2b50\ufe0f\u200d"     # Star, variation selector, zero-width joiner
+    r"]+",
+    flags=re.UNICODE,
+)
+
 
 def provider() -> str:
     p = settings.tts_provider.lower()
@@ -36,9 +45,14 @@ def provider() -> str:
 def speakable(text: str) -> str:
     """Drop links, phone-number punctuation noise and button hints; voice notes stay short."""
     t = re.sub(r"https?://\S+", "", text or "")
-    t = re.sub(r"\n\s*-\s*", ". ", t)
+    t = re.sub(r"\[([^\]]+)\]\([^\)]+\)", r"\1", t)  # strip markdown links [label](url) -> label
+    t = re.sub(r"[*_~`#]", "", t)  # strip markdown formatting bold **, italics *, code `
+    t = EMOJI_PATTERN.sub("", t)  # strip emojis and decorative symbols
+    t = re.sub(r"^[•\-\*]\s*", "", t, flags=re.MULTILINE)  # strip bullet points
+    t = re.sub(r"\n+", ". ", t)
     t = re.sub(r"\s+", " ", t).strip()
     t = re.sub(r"\s+([.,])", r"\1", t)
+    t = re.sub(r"\.{2,}", ".", t)
     return t[:MAX_CHARS]
 
 
@@ -59,9 +73,17 @@ def _edge(text: str, lang: str) -> tuple[bytes, str]:
 
 
 def _sarvam(text: str, lang: str) -> tuple[bytes, str]:
-    r = httpx.post("https://api.sarvam.ai/text-to-speech", headers={"api-subscription-key": settings.stt_api_key}, timeout=25,
-                   json={"text": text[:1500], "language_code": "hi-IN" if lang == "hi" else "en-IN", "model": "bulbul:v2",
-                         "speaker": "anushka"})
+    r = httpx.post(
+        "https://api.sarvam.ai/text-to-speech",
+        headers={"api-subscription-key": settings.stt_api_key},
+        timeout=25,
+        json={
+            "inputs": [text[:1500]],
+            "target_language_code": "hi-IN" if lang == "hi" else "en-IN",
+            "model": "bulbul:v3",
+            "speaker": "kavya",
+        },
+    )
     r.raise_for_status()
     return base64.b64decode("".join(r.json()["audios"])), "audio/wav"
 

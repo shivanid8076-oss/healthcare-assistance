@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func, select
 
-from .api import admin, ai, auth, mock_portal, requests, stock, whatsapp_routes
+from .api import admin, ai, assistant, auth, mock_portal, requests, stock, whatsapp_routes
 from .config import settings
 from .telegram import router as telegram_router
 from .db import init_db, session_scope
@@ -48,7 +48,7 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(title="Rakt Doot API", version="2.0.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_methods=["*"], allow_headers=["*"])
-for r in (auth.router, stock.router, requests.router, whatsapp_routes.router, admin.router, ai.router, ai.hooks, mock_portal.router):
+for r in (auth.router, stock.router, requests.router, whatsapp_routes.router, admin.router, ai.router, ai.hooks, mock_portal.router, assistant.router):
     app.include_router(r)
 
 app.include_router(telegram_router)
