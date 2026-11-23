@@ -15,7 +15,7 @@ function NavigateContent() {
 
     const lat = parseFloat(toLat);
     const lng = parseFloat(toLng);
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
 
     return {
       name: searchParams.get("name") || "Destination Hospital",
@@ -32,7 +32,7 @@ function NavigateContent() {
 
     const lat = parseFloat(fromLat);
     const lng = parseFloat(fromLng);
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
 
     return {
       lat,

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { API_BASE, api } from "@/lib/api";
 import { CampRegister } from "@/components/CampRegister";
@@ -48,7 +49,14 @@ export default function Camps() {
             <div className="units"><b style={{ fontSize: 22 }}>{fmt(c.date)}</b><span>{c.time}</span></div>
             <div className="actions">
               <button className="btn btn-secondary btn-sm" onClick={() => setOpen(open === c.id ? null : c.id)}>{t("camps_register")}</button>
-              {c.lat !== null && c.lng !== null && <a className="btn btn-quiet btn-sm" href={mapLink(c.lat, c.lng)} target="_blank" rel="noreferrer">{t("directions")}</a>}
+              {c.lat !== null && c.lng !== null && (
+                <Link
+                  className="btn btn-quiet btn-sm"
+                  href={`/navigate?to_lat=${c.lat}&to_lng=${c.lng}&name=${encodeURIComponent(c.title)}&address=${encodeURIComponent(c.address || "")}`}
+                >
+                  {t("directions")}
+                </Link>
+              )}
             </div>
             {open === c.id && <CampRegister campId={c.id} title={c.title} />}
           </li>

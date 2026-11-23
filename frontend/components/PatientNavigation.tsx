@@ -85,6 +85,27 @@ export function PatientNavigation({
 
   const [, startTransition] = useTransition();
 
+  // Synchronize state when initial props / URL params change
+  useEffect(() => {
+    if (initialDestination) {
+      setDestination(initialDestination);
+      setDestEditing(false);
+    }
+  }, [initialDestination]);
+
+  useEffect(() => {
+    if (initialOrigin) {
+      setOrigin(initialOrigin);
+      setOriginEditing(false);
+    }
+  }, [initialOrigin]);
+
+  useEffect(() => {
+    if (initialMode) {
+      setMode(initialMode);
+    }
+  }, [initialMode]);
+
   // Debounced Origin Search
   useEffect(() => {
     const q = originQuery.trim();
@@ -300,9 +321,11 @@ export function PatientNavigation({
                     <button
                       type="button"
                       onClick={() => {
-                        setOrigin({ lat: p.lat, lng: p.lng, label: p.name });
-                        setOriginEditing(false);
-                        setOriginQuery("");
+                        if (Number.isFinite(p.lat) && Number.isFinite(p.lng)) {
+                          setOrigin({ lat: p.lat, lng: p.lng, label: p.name });
+                          setOriginEditing(false);
+                          setOriginQuery("");
+                        }
                       }}
                     >
                       <span className="t">{p.name}</span>
@@ -372,9 +395,11 @@ export function PatientNavigation({
                       type="button"
                       aria-pressed={destination?.name === p.name}
                       onClick={() => {
-                        setDestination(p);
-                        setDestEditing(false);
-                        setDestQuery("");
+                        if (Number.isFinite(p.lat) && Number.isFinite(p.lng)) {
+                          setDestination(p);
+                          setDestEditing(false);
+                          setDestQuery("");
+                        }
                       }}
                     >
                       <span className="t">{p.name}</span>

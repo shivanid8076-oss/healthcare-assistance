@@ -54,6 +54,16 @@ export default function SharedRequest() {
         <div><dt className="muted">{t("hospital")}</dt><dd style={{ margin: 0 }}>
           <a href={mapLink(data.hospital.lat, data.hospital.lng)} target="_blank" rel="noreferrer">{data.hospital.name}</a>
           {data.hospital.address && <div className="small muted">{data.hospital.address}</div>}
+          {data.hospital.lat !== null && data.hospital.lng !== null && (
+            <div style={{ marginTop: 6 }}>
+              <Link
+                className="btn btn-secondary btn-sm"
+                href={`/navigate?to_lat=${data.hospital.lat}&to_lng=${data.hospital.lng}&name=${encodeURIComponent(data.hospital.name)}${data.hospital.address ? `&address=${encodeURIComponent(data.hospital.address)}` : ""}`}
+              >
+                📍 {t("directions")}
+              </Link>
+            </div>
+          )}
         </dd></div>
         <div><dt className="muted">{t("patient")}</dt><dd className="num" style={{ margin: 0 }}>{data.patient_age}, {t(data.patient_gender === "M" ? "male" : data.patient_gender === "F" ? "female" : "other")}</dd></div>
       </dl>

@@ -482,7 +482,7 @@ function BankRow({ bank, group, origin }: { bank: Bank; group: Group; origin?: O
   const total = bank.total_compatible;
   const entries = Object.entries(bank.compatible_units) as [Group, number][];
   const navHref = bank.lat !== null && bank.lng !== null
-    ? `/navigate?to_lat=${bank.lat}&to_lng=${bank.lng}&name=${encodeURIComponent(bank.name)}${origin ? `&from_lat=${origin.lat}&from_lng=${origin.lng}&from_label=${encodeURIComponent(origin.label)}` : ""}`
+    ? `/navigate?to_lat=${bank.lat}&to_lng=${bank.lng}&name=${encodeURIComponent(bank.name)}${bank.address ? `&address=${encodeURIComponent(bank.address)}` : ""}${origin ? `&from_lat=${origin.lat}&from_lng=${origin.lng}&from_label=${encodeURIComponent(origin.label)}` : ""}`
     : null;
 
   return (
@@ -543,6 +543,15 @@ function HospitalField({ origin, value, onChange, error }: { origin: Origin; val
             {value.address && <div className="small muted">{value.address}</div>}
           </div>
           <span className="spacer" />
+          {value.lat !== null && value.lng !== null && (
+            <Link
+              className="btn btn-secondary btn-sm"
+              href={`/navigate?to_lat=${value.lat}&to_lng=${value.lng}&name=${encodeURIComponent(value.name)}${value.address ? `&address=${encodeURIComponent(value.address)}` : ""}${origin ? `&from_lat=${origin.lat}&from_lng=${origin.lng}&from_label=${encodeURIComponent(origin.label)}` : ""}`}
+              style={{ marginRight: 8 }}
+            >
+              📍 {t("directions")}
+            </Link>
+          )}
           <button className="linkbtn" onClick={() => setEditing(true)}>{t("change")}</button>
         </div>
       ) : (

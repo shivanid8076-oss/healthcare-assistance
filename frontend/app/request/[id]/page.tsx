@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { GuidePanel } from "@/components/GuidePanel";
@@ -252,6 +253,16 @@ function Dashboard() {
         <p className="small" style={{ margin: "8px 0 0" }}>
           <a href={mapLink(snap.hospital.lat, snap.hospital.lng)} target="_blank" rel="noreferrer">{snap.hospital.name}</a>
         </p>
+        {snap.hospital.lat !== null && snap.hospital.lng !== null && (
+          <div style={{ marginTop: 6 }}>
+            <Link
+              className="btn btn-quiet btn-sm"
+              href={`/navigate?to_lat=${snap.hospital.lat}&to_lng=${snap.hospital.lng}&name=${encodeURIComponent(snap.hospital.name)}${snap.hospital.address ? `&address=${encodeURIComponent(snap.hospital.address)}` : ""}`}
+            >
+              📍 {t("directions")}
+            </Link>
+          </div>
+        )}
         {open && <p className="tiny muted" style={{ margin: 0 }}>{t("keep_page")}</p>}
       </section>
 
