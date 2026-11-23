@@ -62,7 +62,6 @@ export function RouteMap({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [pinchDist, setPinchDist] = useState<number | null>(null);
-  const [scaleDistanceText, setScaleDistanceText] = useState<string>("");
 
   // Store active center & zoom in refs for high-frequency animation frames
   const viewRef = useRef({ center, zoom });
@@ -386,7 +385,6 @@ export function RouteMap({
 
     const actualBarWidth = scaleMeters / metersPerPixel;
     const scaleText = scaleMeters >= 1000 ? `${scaleMeters / 1000} km` : `${scaleMeters} m`;
-    setScaleDistanceText(scaleText);
 
     // Draw Scale Bar on bottom-left
     const barX = 14;
