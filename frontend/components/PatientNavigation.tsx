@@ -9,6 +9,7 @@ import {
   type RouteResponse,
 } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
+import { RouteMap } from "./RouteMap";
 
 export type NavOrigin = {
   lat: number;
@@ -73,6 +74,7 @@ export function PatientNavigation({
   const [originBusy, setOriginBusy] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locDenied, setLocDenied] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   // Destination search & suggestions state
   const [destEditing, setDestEditing] = useState<boolean>(!initialDestination);
@@ -161,6 +163,8 @@ export function PatientNavigation({
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLocating(false);
+        const uLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setUserLocation(uLoc);
         const newOrigin: NavOrigin = {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
@@ -463,6 +467,17 @@ export function PatientNavigation({
       {/* Route Display Section */}
       {route && !loading && !error && (
         <div className="stack" style={{ ["--gap" as string]: "18px" }}>
+          {/* Interactive Route Map */}
+          <RouteMap
+            origin={origin}
+            destination={destination}
+            geometry={route.geometry}
+            isFallback={route.is_fallback}
+            fallbackReason={route.fallback_reason}
+            userLocation={userLocation}
+            height={380}
+          />
+
           {/* Source Authentication Badge & Summary */}
           <div className="row" style={{ justifyContent: "space-between" }}>
             {route.is_fallback ? (
