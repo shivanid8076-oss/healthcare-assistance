@@ -1267,3 +1267,126 @@ main:has(> .hm-hero:first-child) { padding-top: 0; }
     animation: none !important;
   }
 }
+
+/* ---------- Patient Navigation (Phase 2) ---------- */
+.nav-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.nav-stat-card {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+}
+.nav-stat-label {
+  font-size: 13px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+.nav-stat-val {
+  font-family: var(--serif);
+  font-size: clamp(24px, 4vw, 32px);
+  color: var(--burgundy);
+  font-weight: 500;
+  line-height: 1.15;
+  margin-top: 4px;
+}
+.nav-badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1e633d;
+  background: #e8f5ed;
+  border: 1px solid #c2e2ce;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+.nav-badge-fallback {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #875405;
+  background: var(--ochre-tint);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+.nav-step-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: #fffef8;
+  overflow: hidden;
+}
+.nav-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--rule);
+  transition: background-color 100ms ease;
+}
+.nav-step-item:last-child {
+  border-bottom: 0;
+}
+.nav-step-item:hover {
+  background: var(--paper);
+}
+.nav-step-icon {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 50%;
+  background: var(--paper-deep);
+  color: var(--burgundy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.nav-step-item:last-child .nav-step-icon {
+  background: var(--burgundy);
+  color: var(--ivory);
+}
+.nav-step-details {
+  flex: 1;
+  min-width: 0;
+}
+.nav-step-instruction {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.nav-step-meta {
+  font-size: 13.5px;
+  color: var(--muted);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-step-road {
+  background: var(--paper-deep);
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+}
+

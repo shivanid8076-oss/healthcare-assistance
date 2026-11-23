@@ -396,6 +396,35 @@ const DICT = {
     en: "AI guidance only. In an emergency, call 112 or visit the nearest hospital.",
     hi: "केवल AI मार्गदर्शन। आपात स्थिति में 112 पर कॉल करें या निकटतम अस्पताल जाएं।",
   },
+
+  // Patient Navigation (Phase 2)
+  nav_navigate: { en: "Hospital routes", hi: "अस्पताल मार्ग" },
+  nav_title: { en: "Patient Navigation", hi: "मरीज़ अस्पताल मार्ग" },
+  nav_subtitle: {
+    en: "Find road and transit routes to hospitals and blood centres with turn-by-turn directions.",
+    hi: "अस्पतालों और ब्लड सेंटरों तक सड़क और पारगमन मार्ग और दिशा-निर्देश प्राप्त करें।",
+  },
+  nav_origin: { en: "Starting location", hi: "शुरुआती स्थान" },
+  nav_destination: { en: "Destination hospital", hi: "गंतव्य अस्पताल" },
+  nav_mode_driving: { en: "Driving", hi: "गाड़ी से" },
+  nav_mode_walking: { en: "Walking", hi: "पैदल" },
+  nav_mode_transit: { en: "Transit", hi: "बस/मेट्रो" },
+  nav_est_time: { en: "Est. travel time", hi: "अनुमानित समय" },
+  nav_distance: { en: "Distance", hi: "दूरी" },
+  nav_steps: { en: "Turn-by-turn directions", hi: "कदम-दर-कदम दिशा-निर्देश" },
+  nav_fallback_alert: {
+    en: "Live routing service is temporarily unavailable. Showing an estimated direct corridor and travel times.",
+    hi: "लाइव रूट सेवा अस्थायी रूप से अनुपलब्ध है। अनुमानित सीधा मार्ग और समय दिखाया जा रहा है।",
+  },
+  nav_live_osrm: { en: "Live road route", hi: "लाइव सड़क मार्ग" },
+  nav_calculating: { en: "Calculating best route...", hi: "मार्ग की गणना की जा रही है..." },
+  nav_no_route: {
+    en: "Please select both your starting location and destination hospital to see the route.",
+    hi: "मार्ग देखने के लिए कृपया अपना शुरुआती स्थान और गंतव्य अस्पताल दोनों चुनें।",
+  },
+  nav_choose_hospital: { en: "Choose hospital or blood centre", hi: "अस्पताल या ब्लड सेंटर चुनें" },
+  nav_change_origin: { en: "Change start", hi: "शुरुआत बदलें" },
+  nav_change_dest: { en: "Change hospital", hi: "अस्पताल बदलें" },
 } as const;
 
 export type Key = keyof typeof DICT;

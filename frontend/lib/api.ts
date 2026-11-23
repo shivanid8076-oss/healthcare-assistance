@@ -206,6 +206,60 @@ export async function fetchAssistantSpeech(text: string, lang?: string): Promise
   return res.blob();
 }
 
+export type NavigationMode = "driving" | "walking" | "transit";
+
+export type StepInstruction = {
+  instruction: string;
+  distance_m: number;
+  duration_s: number;
+  maneuver_type: string;
+  modifier: string | null;
+  name: string | null;
+};
+
+export type RouteResponse = {
+  source: string;
+  is_fallback: boolean;
+  fallback_reason: string | null;
+  distance_km: number;
+  duration_minutes: number;
+  mode: NavigationMode;
+  origin: { lat: number; lng: number };
+  destination: { lat: number; lng: number };
+  geometry: [number, number][];
+  steps: StepInstruction[];
+  summary: string;
+};
+
+/** Fetch route with turn-by-turn navigation between origin and destination coordinates */
+export async function fetchRoute(
+  from_lat: number,
+  from_lng: number,
+  to_lat: number,
+  to_lng: number,
+  mode: NavigationMode = "driving",
+): Promise<RouteResponse> {
+  if (!Number.isFinite(from_lat) || !Number.isFinite(from_lng) || !Number.isFinite(to_lat) || !Number.isFinite(to_lng)) {
+    throw new ApiError(400, "Invalid coordinates provided for routing.");
+  }
+  if (from_lat < -90 || from_lat > 90 || to_lat < -90 || to_lat > 90) {
+    throw new ApiError(400, "Latitude must be between -90 and 90.");
+  }
+  if (from_lng < -180 || from_lng > 180 || to_lng < -180 || to_lng > 180) {
+    throw new ApiError(400, "Longitude must be between -180 and 180.");
+  }
+
+  const query = new URLSearchParams({
+    from_lat: from_lat.toFixed(6),
+    from_lng: from_lng.toFixed(6),
+    to_lat: to_lat.toFixed(6),
+    to_lng: to_lng.toFixed(6),
+    mode,
+  });
+
+  return api<RouteResponse>(`/api/navigation/route?${query.toString()}`);
+}
+
 export type Config = {
   whatsapp_mode: "cloud" | "twilio" | "mock"; tinyfish_mode: "live" | "demo"; join_link: string; component: string; radii_km: number[];
   quiet_hours: boolean; llm: "live" | "rules"; vision: "live" | "sample"; stt: string; replay: boolean; proxy_country: string;

@@ -40,6 +40,7 @@ export function Header() {
     ["/how-it-works", t("nav_how")],
   ];
   const tools: [string, string][] = [
+    ["/navigate", t("nav_navigate")],
     ["/radar", t("nav_radar")],
     ["/camps", t("nav_camps")],
     ["/running", "Running requests"],

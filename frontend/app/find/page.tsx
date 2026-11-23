@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StockPlate } from "@/components/ProximityPlate";
@@ -459,7 +460,7 @@ function StockStep({ group, component, origin, onAskDonors }: { group: Group; co
                 {result.streaming_url && <a href={result.streaming_url} target="_blank" rel="noreferrer">{t("watch_agent")}</a>}
               </div>
               <ul className="register">
-                {banks.map((b, i) => <BankRow key={`${b.name}-${i}`} bank={b} group={group} />)}
+                {banks.map((b, i) => <BankRow key={`${b.name}-${i}`} bank={b} group={group} origin={origin} />)}
               </ul>
               <p className="small muted">{t("found_stock")}</p>
             </>
@@ -476,10 +477,14 @@ function StockStep({ group, component, origin, onAskDonors }: { group: Group; co
   );
 }
 
-function BankRow({ bank, group }: { bank: Bank; group: Group }) {
+function BankRow({ bank, group, origin }: { bank: Bank; group: Group; origin?: Origin }) {
   const { t } = useLang();
   const total = bank.total_compatible;
   const entries = Object.entries(bank.compatible_units) as [Group, number][];
+  const navHref = bank.lat !== null && bank.lng !== null
+    ? `/navigate?to_lat=${bank.lat}&to_lng=${bank.lng}&name=${encodeURIComponent(bank.name)}${origin ? `&from_lat=${origin.lat}&from_lng=${origin.lng}&from_label=${encodeURIComponent(origin.label)}` : ""}`
+    : null;
+
   return (
     <li>
       <div>
@@ -506,8 +511,10 @@ function BankRow({ bank, group }: { bank: Bank; group: Group }) {
       {!entries.length && bank.availability_text && <div className="split">{bank.availability_text}</div>}
       <div className="actions">
         {bank.phone && <a className="btn btn-quiet btn-sm" href={`tel:${bank.phone.replace(/[^\d+]/g, "")}`}>{t("call")} {bank.phone}</a>}
-        {bank.lat !== null && bank.lng !== null && (
-          <a className="btn btn-quiet btn-sm" href={mapLink(bank.lat, bank.lng)} target="_blank" rel="noreferrer">{t("directions")}</a>
+        {navHref && (
+          <Link className="btn btn-secondary btn-sm" href={navHref}>
+            {t("directions")}
+          </Link>
         )}
       </div>
     </li>
