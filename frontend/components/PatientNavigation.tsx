@@ -500,7 +500,10 @@ export function PatientNavigation({
             isFallback={route.is_fallback}
             fallbackReason={route.fallback_reason}
             userLocation={userLocation}
-            height={380}
+            height={420}
+            distanceKm={route.distance_km}
+            durationMinutes={route.duration_minutes}
+            mode={mode}
           />
 
           {/* Source Authentication Badge & Summary */}
